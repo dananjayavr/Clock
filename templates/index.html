@@ -92,7 +92,7 @@
                     setDarkMode() {
                         if (!this.manualOverride) {
                             const hour = new Date().getHours();
-                            this.darkMode = hour >= 20 || hour < 7; // dark mode between 8pm and 7am
+                            this.darkMode = hour >= 19 || hour < 7; // dark mode between 7pm and 7am
                         }
                     },
                 };
