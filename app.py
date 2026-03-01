@@ -16,3 +16,6 @@ def get_time():
     with open(f"literature-clock/docs/times/{filename}") as f:
         d = json.load(f)
     return jsonify(random.choice(d))
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)

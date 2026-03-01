@@ -1,4 +1,4 @@
 [Desktop Entry]
 Type=Application
 Name=Literature Clock
-Exec=bash -c "until curl -s http://127.0.0.1:5000 > /dev/null; do sleep 1; done && chromium-browser http://127.0.0.1:5000 --noerrdialogs --disable-infobars --no-first-run --ozone-platform=wayland --enable-features=OverlayScrollbar --start-maximized --kiosk --password-store=basic"
+Exec=bash -c "timeout 30 bash -c 'until curl -s http://127.0.0.1:5000 > /dev/null; do sleep 1; done'; chromium-browser http://127.0.0.1:5000 --noerrdialogs --disable-infobars --no-first-run --ozone-platform=wayland --enable-features=OverlayScrollbar --start-maximized --kiosk --password-store=basic"
