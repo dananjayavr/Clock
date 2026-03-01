@@ -1,0 +1,12 @@
+[Unit]
+Description=Literature Clock Flask App
+After=network.target
+
+[Service]
+User=dananjaya
+WorkingDirectory=/home/dananjaya/Clock
+ExecStart=/home/dananjaya/Clock/venv/bin/python app.py
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,4 @@
+[Desktop Entry]
+Type=Application
+Name=Literature Clock
+Exec=chromium-browser http://127.0.0.1:5000 --noerrdialogs --disable-infobars --no-first-run --ozone-platform=wayland --enable-features=OverlayScrollbar --start-maximized --kiosk
