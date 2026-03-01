@@ -25,10 +25,15 @@
         x-data="clock()"
         x-init="init()"
         :class="darkMode ? 'bg-gray-900 text-white' : 'bg-amber-50 text-gray-900'"
-        class="min-h-screen flex items-center justify-center transition-colors duration-500"
+        class="min-h-screen max-h-screen overflow-hidden flex items-center justify-center transition-colors duration-500"
     >
-        <div class="max-w-2xl mx-auto px-8 text-center">
-            <p class="font-woody text-2xl leading-relaxed italic mb-6">
+        <div
+            class="w-full h-screen flex flex-col items-center justify-center px-8 py-6"
+        >
+            <p
+                class="font-woody leading-relaxed italic mb-6 text-center max-w-3xl"
+                style="font-size: clamp(0.8rem, 2.5vw, 1.5rem)"
+            >
                 <span x-html="quote_first"></span>
                 <strong
                     :class="darkMode ? 'text-white' : 'text-gray-900'"
@@ -39,10 +44,10 @@
             </p>
             <p
                 :class="darkMode ? 'text-gray-400' : 'text-gray-500'"
-                class="text-sm tracking-wide mb-8"
+                class="tracking-wide mb-8 text-center"
+                style="font-size: clamp(0.6rem, 1.5vw, 1rem)"
                 x-html="`— ${title} by ${author}`"
             ></p>
-
             <button
                 @click="manualOverride = true; darkMode = !darkMode"
                 :class="darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-amber-200 hover:bg-amber-300 text-gray-900'"
@@ -72,7 +77,6 @@
                     init() {
                         this.setDarkMode();
                         this.fetchTime();
-
                         // Wait until the start of the next minute, then poll every 60s
                         const msUntilNextMinute =
                             (60 - new Date().getSeconds()) * 1000;
