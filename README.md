@@ -4,7 +4,7 @@ A Raspberry Pi kiosk that displays literary quotes matching the current time, bu
 
 ## How It Works
 
-Every minute, the app reads a JSON file matching the current time (e.g. `14_35.json`) from the `literature-clock/docs/times/` submodule, picks a random quote, and displays it in the browser in kiosk mode. Dark/light mode switches automatically based on the time of day.
+Every minute, the app reads a JSON file matching the current time (e.g. `14_35.json`) from the `literature-clock/docs/times/` submodule, picks a random quote, and displays it in the browser in kiosk mode. Dark/light mode and screen brightness both adjust automatically based on the time of day.
 
 ---
 
@@ -69,11 +69,14 @@ mkdir -p ~/.config/labwc
 nano ~/.config/labwc/autostart
 ```
 
-Add this line:
+Add these lines:
 
 ```bash
+echo 100 | sudo tee /sys/class/backlight/10-0045/brightness
 bash -c "until curl -s http://127.0.0.1:5000 > /dev/null; do sleep 1; done; chromium-browser http://127.0.0.1:5000 --noerrdialogs --disable-infobars --no-first-run --ozone-platform=wayland --enable-features=OverlayScrollbar --start-maximized --kiosk --password-store=basic" &
 ```
+
+> **Note:** The brightness value ranges from 0 to 255. Adjust `100` to your preference.
 
 Make it executable:
 
@@ -85,7 +88,36 @@ chmod +x ~/.config/labwc/autostart
 
 > **Note:** `--password-store=basic` prevents the keyring password popup on boot.
 
-### 5. Boot to desktop
+### 5. Allow brightness control without password
+
+The Flask app adjusts brightness automatically based on time of day. Allow it to write without sudo prompts:
+
+```bash
+sudo visudo
+```
+
+Add this line:
+
+```
+dananjaya ALL=(ALL) NOPASSWD: /usr/bin/tee /sys/class/backlight/10-0045/brightness
+```
+
+Test it manually:
+
+```bash
+echo 100 | sudo tee /sys/class/backlight/10-0045/brightness
+```
+
+The brightness endpoint in `app.py` uses these time-based levels:
+
+| Time | Brightness |
+|------|-----------|
+| 22:00 – 06:00 | 30 (night) |
+| 20:00 – 22:00 | 80 (evening) |
+| 08:00 – 18:00 | 255 (daytime) |
+| 06:00 – 08:00 / 18:00 – 20:00 | 150 (morning/dusk) |
+
+### 6. Boot to desktop
 
 The Pi must boot to desktop (not CLI) for the autostart to work:
 
@@ -94,7 +126,7 @@ sudo raspi-config
 # System Options → Boot / Auto Login → Desktop Autologin
 ```
 
-### 6. Remove any conflicting autostart entries
+### 7. Remove any conflicting autostart entries
 
 Check for and remove any old autostart scripts that might launch a different page:
 
@@ -151,6 +183,13 @@ grep -r "chromium" ~/.config/
 ls ~/
 ```
 
+**Brightness not changing**
+Check the backlight path exists and test manually:
+```bash
+ls /sys/class/backlight/
+echo 100 | sudo tee /sys/class/backlight/10-0045/brightness
+```
+
 **Autostart not firing**
 Make sure you're editing files in the correct terminal session and home directory:
 ```bash
@@ -177,9 +216,9 @@ Clock/
 
 ## Tech Stack
 
-- **Flask** — serves the app and picks a random quote for the current minute
-- **Alpine.js** — reactive frontend, refreshes the quote in sync with the clock
+- **Flask** — serves the app, picks a random quote, and controls screen brightness
+- **Alpine.js** — reactive frontend, refreshes quote, dark mode, and brightness in sync with the clock
 - **Tailwind CSS** — styling with automatic dark/light mode based on time of day
-- **Playfair Display** — elegant serif font via Google Fonts
+- **Special Elite** — typewriter-style font via Google Fonts
 - **labwc** — Wayland compositor on Raspberry Pi OS that handles autostart
 - **systemd** — keeps the Flask server running and restarts it on failure

@@ -76,15 +76,17 @@
                     },
                     init() {
                         this.setDarkMode();
+                        this.setBrightness();
                         this.fetchTime();
-                        // Wait until the start of the next minute, then poll every 60s
                         const msUntilNextMinute =
                             (60 - new Date().getSeconds()) * 1000;
                         setTimeout(() => {
                             this.setDarkMode();
+                            this.setBrightness();
                             this.fetchTime();
                             setInterval(() => {
                                 this.setDarkMode();
+                                this.setBrightness();
                                 this.fetchTime();
                             }, 60000);
                         }, msUntilNextMinute);
@@ -94,6 +96,20 @@
                             const hour = new Date().getHours();
                             this.darkMode = hour >= 19 || hour < 7; // dark mode between 7pm and 7am
                         }
+                    },
+                    setBrightness() {
+                        const hour = new Date().getHours();
+                        let brightness;
+                        if (hour >= 22 || hour < 6) {
+                            brightness = 30; // night — very dim
+                        } else if (hour >= 20) {
+                            brightness = 80; // evening — dim
+                        } else if (hour >= 8 && hour < 18) {
+                            brightness = 255; // daytime — full brightness
+                        } else {
+                            brightness = 150; // morning/dusk — medium
+                        }
+                        fetch(`/brightness/${brightness}`);
                     },
                 };
             }
