@@ -1,0 +1,83 @@
+<html>
+    <head>
+        <script
+            defer
+            src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+        ></script>
+        <script src="https://cdn.tailwindcss.com"></script>
+    </head>
+    <body
+        x-data="clock()"
+        x-init="init()"
+        :class="darkMode ? 'bg-gray-900 text-white' : 'bg-amber-50 text-gray-900'"
+        class="min-h-screen flex items-center justify-center transition-colors duration-500"
+    >
+        <div class="max-w-2xl mx-auto px-8 text-center">
+            <p class="text-2xl leading-relaxed italic mb-6">
+                <span x-text="quote_first"></span>
+                <strong
+                    :class="darkMode ? 'text-white' : 'text-gray-900'"
+                    class="not-italic font-bold"
+                    x-text="quote_time_case"
+                ></strong>
+                <span x-text="quote_last"></span>
+            </p>
+            <p
+                :class="darkMode ? 'text-gray-400' : 'text-gray-500'"
+                class="text-sm tracking-wide mb-8"
+                x-text="`— ${title} by ${author}`"
+            ></p>
+
+            <button
+                @click="manualOverride = true; darkMode = !darkMode"
+                :class="darkMode ? 'bg-gray-700 hover:bg-gray-600 text-white' : 'bg-amber-200 hover:bg-amber-300 text-gray-900'"
+                class="px-4 py-2 rounded-full text-sm transition-colors duration-300"
+                x-text="darkMode ? '☀️ Light mode' : '🌙 Dark mode'"
+            ></button>
+        </div>
+        <script>
+            function clock() {
+                return {
+                    darkMode: true,
+                    manualOverride: false,
+                    quote_first: "",
+                    quote_time_case: "",
+                    quote_last: "",
+                    title: "",
+                    author: "",
+                    async fetchTime() {
+                        const res = await fetch("/time");
+                        const data = await res.json();
+                        this.quote_first = data.quote_first;
+                        this.quote_time_case = data.quote_time_case;
+                        this.quote_last = data.quote_last;
+                        this.title = data.title;
+                        this.author = data.author;
+                    },
+                    init() {
+                        this.setDarkMode();
+                        this.fetchTime();
+
+                        // Wait until the start of the next minute, then poll every 60s
+                        const msUntilNextMinute =
+                            (60 - new Date().getSeconds()) * 1000;
+                        setTimeout(() => {
+                            this.setDarkMode();
+                            this.fetchTime();
+                            setInterval(() => {
+                                this.setDarkMode();
+                                this.fetchTime();
+                            }, 60000);
+                        }, msUntilNextMinute);
+                    },
+                    setDarkMode() {
+                        if (!this.manualOverride) {
+                            const hour = new Date().getHours();
+                            this.darkMode = hour >= 20 || hour < 7; // dark mode between 8pm and 7am
+                        }
+                    },
+                };
+            }
+        </script>
+    </body>
+</html>
